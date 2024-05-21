@@ -157,6 +157,9 @@ app.get('/logout', (req, res) => {
 });
 app.post('/delete/:id', isAuthenticated, (req, res) => {
     // TODO: Delete a post if the current user is the owner
+    console.log("feteched Id? : " + req.params['id']);
+    deletePost(parseInt(req.params['id']));
+    res.redirect('/');
 });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -341,6 +344,20 @@ function addPost(title, content, user) {
     let newPost = {id: postId, title: title, content: content, username: user.username, timestamp: 0, likes: 0};
 
     posts.push(newPost);
+}
+
+function deletePost(postId) {
+    console.log("in delete: "+ postId);
+    for (let index = 0; index < posts.length; index++) {
+        console.log("loop");
+        if (posts[index].id === postId) {
+            
+            console.log("deleteing: " + posts[index].title);
+            posts.splice(index, 1);
+            
+            return;
+        }
+    }
 }
 
 // Function to generate an image avatar

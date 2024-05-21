@@ -13,7 +13,14 @@
             <!-- everything that is shown in the status bar -->
             <!-- Heart = ♥ -->
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
-            <p>{{this.likes}} Likes      Posted by {{this.username}} on {{this.timestamp}}</p>
+            <p> {{this.likes}} Likes      
+                    Posted by {{this.username}} on {{this.timestamp}}
+                    
+                {{#ifCond this.username user.username}}
+                    <button type="button" class="delete-button" data-id={{this.id}} onclick="handleDeleteClick(this)">
+                        <i class="fas fa-trash-alt"></i></button>
+                {{/ifCond}}
+            </p>
         </div>        
     </div>
 </div>
@@ -25,11 +32,13 @@
         // you might want to "fetch" something...        
     }
 
-    function handleDeleteClick(event) {
-        const buttonElement = event.target.closest('.delete-button');
+    function handleDeleteClick(buttonElement) {
         const postId = buttonElement.getAttribute('data-id');        
 
-        // you might want to "fetch" something...        
+        console.log("deleting post: " + postId);
         
+        fetch('/delete/' + postId, { method: 'POST' } );    
     }    
+
+    
 </script>
