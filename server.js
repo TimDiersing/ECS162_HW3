@@ -99,7 +99,6 @@ app.use(express.json());                            // Parse JSON bodies (as sen
 app.get('/', (req, res) => {
     const posts = getPosts();
     const user = getCurrentUser(req) || {};
-    console.log("in get: " + user.username);
     res.render('home', { posts, user });
 });
 
@@ -124,17 +123,22 @@ app.get('/error', (req, res) => {
 // Additional routes that you must implement
 
 
-app.get('/post/:id', (req, res) => {
-    // TODO: Render post detail page
-});
 app.post('/posts', (req, res) => {
     // TODO: Add a new post and redirect to home
+    let user = getCurrentUser(req, res);
+
+    if (user) {
+        addPost(req.body.title, req.body.content, user);
+    }
+
+    res.redirect("/");
 });
 app.post('/like/:id', (req, res) => {
     // TODO: Update post likes
 });
 app.get('/profile', isAuthenticated, (req, res) => {
     // TODO: Render profile page
+    renderProfile(req, res);
 });
 app.get('/avatar/:username', (req, res) => {
     // TODO: Serve the avatar image for the user
@@ -283,11 +287,24 @@ function logoutUser(req, res) {
 // Function to render the profile page
 function renderProfile(req, res) {
     // TODO: Fetch user posts and render the profile page
+    let userPosts = [];
+    let user = getCurrentUser(req);
+
+    for (let index = 0; index < posts.length; index++) {
+        if (posts[index].username === user.username) {
+            userPosts.push(posts[index]);
+        }
+    }
+
+    Object.defineProperty(user, "posts", {value: userPosts});
+
+    res.render('profile', { user });
 }
 
 // Function to update post likes
 function updatePostLikes(req, res) {
     // TODO: Increment post likes if conditions are met
+
 }
 
 // Function to handle avatar generation and serving
@@ -299,7 +316,6 @@ function handleAvatar(req, res) {
     let buffer = generateAvatar(letter, 100, 100);
     fs.writeFileSync("./public/avatar/" + user.username + ".png", buffer);
 
-    console.log("past font");
 }
 
 // Function to get the current user from session
@@ -307,7 +323,6 @@ function getCurrentUser(req) {
     // TODO: Return the user object if the session user ID matches
     for (let index = 0; index < users.length; index++) {
         if (req.session.userId === users[index].id) {
-            console.log("User FOund!");
             return users[index];
         }
     }
@@ -322,7 +337,10 @@ function getPosts() {
 // Function to add a new post
 function addPost(title, content, user) {
     // TODO: Create a new post object and add to posts array
-    //let newPost = {id: }
+    let postId = posts[posts.length - 1].id + 1;
+    let newPost = {id: postId, title: title, content: content, username: user.username, timestamp: 0, likes: 0};
+
+    posts.push(newPost);
 }
 
 // Function to generate an image avatar
