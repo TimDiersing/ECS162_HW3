@@ -135,6 +135,7 @@ app.post('/posts', (req, res) => {
 });
 app.post('/like/:id', (req, res) => {
     // TODO: Update post likes
+    updatePostLikes(req, res);
 });
 app.get('/profile', isAuthenticated, (req, res) => {
     // TODO: Render profile page
@@ -159,7 +160,6 @@ app.post('/delete/:id', isAuthenticated, (req, res) => {
     // TODO: Delete a post if the current user is the owner
     console.log("feteched Id? : " + req.params['id']);
     deletePost(parseInt(req.params['id']));
-    res.redirect('/');
 });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -176,8 +176,8 @@ app.listen(PORT, () => {
 
 // Example data for posts and users
 let posts = [
-    { id: 1, title: 'Sample Post', content: 'This is a sample post.', username: 'SampleUser', timestamp: '2024-01-01 10:00', likes: 0 },
-    { id: 2, title: 'Another Post', content: 'This is another sample post.', username: 'AnotherUser', timestamp: '2024-01-02 12:00', likes: 0 },
+    { id: 1, title: 'Sample Post', content: 'This is a sample post.', username: 'SampleUser', timestamp: '2024-01-01 10:00', likes: 0, likedBy: [] },
+    { id: 2, title: 'Another Post', content: 'This is another sample post.', username: 'AnotherUser', timestamp: '2024-01-02 12:00', likes: 0, likedBy: [] },
 ];
 let users = [
     { id: 1, username: 'SampleUser', avatar_url: undefined, memberSince: '2024-01-01 08:00' },
@@ -304,10 +304,33 @@ function renderProfile(req, res) {
     res.render('profile', { user });
 }
 
+function findPost(postId) {
+    for (let index = 0; index < posts.length; index++) {
+        if (posts[index].id === postId) {
+            return posts[index];
+        }
+    }
+
+    return;
+}
+
 // Function to update post likes
 function updatePostLikes(req, res) {
     // TODO: Increment post likes if conditions are met
+    let post = findPost(parseInt(req.params['id']));
+    let user = findUserById(req.session.userId);
 
+    for (let index = 0; index < post.likedBy.length; index++) {
+        if (post.likedBy[index] === user.id) {
+            console.log("Post already liked by this user");
+            return;
+        }
+    }
+
+    post.likedBy.push(user.id);
+    post.likes++;
+
+    res.redirect('/');
 }
 
 // Function to handle avatar generation and serving
@@ -347,7 +370,6 @@ function addPost(title, content, user) {
 }
 
 function deletePost(postId) {
-    console.log("in delete: "+ postId);
     for (let index = 0; index < posts.length; index++) {
         console.log("loop");
         if (posts[index].id === postId) {
