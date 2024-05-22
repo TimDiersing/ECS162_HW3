@@ -180,8 +180,8 @@ let posts = [
     { id: 2, title: 'Another Post', content: 'This is another sample post.', username: 'AnotherUser', timestamp: '2024-01-02 12:00', likes: 0, likedBy: [] },
 ];
 let users = [
-    { id: 1, username: 'SampleUser', avatar_url: undefined, memberSince: '2024-01-01 08:00' },
-    { id: 2, username: 'AnotherUser', avatar_url: undefined, memberSince: '2024-01-02 09:00' },
+    { id: 1, username: 'SampleUser', avatar_url: undefined, memberSince: '2024-01-01 08:00', posts: [posts[0]]},
+    { id: 2, username: 'AnotherUser', avatar_url: undefined, memberSince: '2024-01-02 09:00', posts: [posts[1]]},
 ];
 
 // Function to find a user by username
@@ -213,7 +213,7 @@ function addUser(username) {
     // TODO: Create a new user object and add to users array
     let date = new Date();
     let newUser = { id: users.length+1, username: username, 
-                    avatar_url: undefined, memberSince: date};
+                    avatar_url: undefined, memberSince: date, posts: []};
 
     users.push(newUser);
 
@@ -290,16 +290,7 @@ function logoutUser(req, res) {
 // Function to render the profile page
 function renderProfile(req, res) {
     // TODO: Fetch user posts and render the profile page
-    let userPosts = [];
     let user = getCurrentUser(req);
-
-    for (let index = 0; index < posts.length; index++) {
-        if (posts[index].username === user.username) {
-            userPosts.push(posts[index]);
-        }
-    }
-
-    Object.defineProperty(user, "posts", {value: userPosts});
 
     res.render('profile', { user });
 }
@@ -364,8 +355,9 @@ function getPosts() {
 function addPost(title, content, user) {
     // TODO: Create a new post object and add to posts array
     let postId = posts[posts.length - 1].id + 1;
-    let newPost = {id: postId, title: title, content: content, username: user.username, timestamp: 0, likes: 0};
+    let newPost = {id: postId, title: title, content: content, username: user.username, timestamp: 0, likes: 0, likedBy: []};
 
+    user.posts.push(newPost);
     posts.push(newPost);
 }
 
@@ -374,7 +366,12 @@ function deletePost(postId) {
         console.log("loop");
         if (posts[index].id === postId) {
             
-            console.log("deleteing: " + posts[index].title);
+            let user = findUserByUsername(posts[index].username);
+            for ( let j = 0; j < user.posts.length; j++) {
+                if (user.posts.id === postId) {
+                    user.posts.splice(j, 1);
+                }
+            }
             posts.splice(index, 1);
             
             return;
