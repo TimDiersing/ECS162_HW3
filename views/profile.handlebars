@@ -4,11 +4,7 @@
 <div class="profile-container">
     <div class="profile-avatar">
         <!-- Correct path for the default avatar image -->
-        <img src="{{#if user.avatar_url}}
-                    {{user.avatar_url}}
-                {{else}}
-                    /avatar/{{user.username}}.png
-                {{/if}}" 
+        <img src="/avatar/{{user.username}}" 
                 alt="User Avatar">
     </div>
     
@@ -25,10 +21,10 @@
     <h2>Your {{{postNeoType}}}s</h2>
     
     <!-- you'll need to make this conditaionl and #each expression work -->
-    {{#if user.posts.length}}
+    {{#if usersPosts.length}}
         <ul>
-            {{#each user.posts}}
-                {{> post this}}
+            {{#each usersPosts}}
+                {{> post this userEvents=../userEvents loggedIn=../loggedIn}}
             {{/each}}
         </ul>
     {{else}}
@@ -36,3 +32,27 @@
         <p>You have not posted yet, poster.</p>
     {{/if}}
 </section>
+
+<section class="followed-posts">
+    <!-- you can call posts tweets, or truths, or whatever, these are neologisms. Choose your own new in server.js -->
+    <h2>Followed {{{postNeoType}}}s</h2>
+    
+    <!-- you'll need to make this conditaionl and #each expression work -->
+    {{#if eventPosts.length}}
+        <ul>
+            {{#each eventPosts}}
+                {{> post this userEvents=../userEvents}}
+            {{/each}}
+        </ul>
+    {{else}}
+        <!-- fix this up with some helper functions and other handlebars expressions, or add you own character -->
+        <p>You are not following any posts.</p>
+    {{/if}}
+</section>
+
+<script>
+    function printDate(date) {
+        let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString("en-US", options);
+    }
+</script>

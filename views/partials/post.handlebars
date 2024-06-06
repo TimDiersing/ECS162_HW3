@@ -2,10 +2,13 @@
 <div class="post">
     <div class="post-avatar">
         <!-- the user's avatar -->
+        <img src="/avatar/{{this.username}}" alt="User Avatar">
     </div>
     <div class="post-content preserve-newlines">
         <!-- the post -->
-        <h2>{{ this.title }}</h2>
+        <h2>{{ this.title }}  Sport: {{ this.sport }}</h2>
+
+        <p>Event Time: {{ this.eventTime }}</p>
 
         <p>{{ this.content }}</p>
         
@@ -14,32 +17,50 @@
             <!-- Heart = ♥ -->
             <!-- font awesome  trashcan = <i class="fas fa-trash-alt"> </i>-->
             <p> 
-                <button type="button" class="like-button" data-id={{this.id}} onclick="handleLikeClick(this)">♥</button>
-                {{this.likes}} Likes      
-                    Posted by {{this.username}} on {{this.timestamp}}
+                {{#if loggedIn}}
+                    {{#ifContains userEvents this.id}}
+                        <button type="button" class="follow-button followed" 
+                            data-id={{this.id}} onclick="handleFollowClick(this)">followed</button>
+                    {{else}}
+                        <button type="button" class="follow-button" 
+                            data-id={{this.id}} onclick="handleFollowClick(this)">follow</button>
+                    {{/ifContains}}
+                {{/if}}
+
+                    {{this.followers}} Followers Posted by {{this.username}} on {{this.timestamp}}
                     
-                {{#ifCond this.username user.username}}
-                    <button type="button" class="delete-button" data-id={{this.id}} onclick="handleDeleteClick(this)">
-                        <i class="fas fa-trash-alt"></i></button>
-                {{/ifCond}}
+                {{#if loggedIn}}
+                    {{#ifCond this.username user.username}}
+                        <button type="button" class="delete-button" data-id={{this.id}} onclick="handleDeleteClick(this)">
+                            <i class="fas fa-trash-alt"></i></button>
+                    {{/ifCond}}
+                {{/if}}
             </p>
         </div>        
     </div>
 </div>
 <script>
 
-    function handleLikeClick(buttonElement) {
+    function handleFollowClick(buttonElement) {
         const postId = buttonElement.getAttribute('data-id');
+        buttonElement.classList.toggle("followed");
 
-        fetch('/like/' + postId, { method: 'POST' } );       
+        if (buttonElement.classList.contains("followed")) {
+            fetch('/follow/' + postId, { method: 'POST' } );       
+
+        } else {
+            fetch('/unfollow/' + postId, { method: 'POST' } );  
+        }
+
+        location.reload();
     }
 
     function handleDeleteClick(buttonElement) {
         const postId = buttonElement.getAttribute('data-id');        
-
-        console.log("deleting post: " + postId);
         
         fetch('/delete/' + postId, { method: 'POST' } );    
+
+        location.reload();
     }    
 
     
